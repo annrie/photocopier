@@ -28,11 +28,12 @@ RSpec.describe Photocopier::FTP do
       let(:options) do
         { host: 'host', passive: true }
       end
-      let(:ftp) { double('ftp').as_null_object }
 
       it 'should enable passive mode' do
-        allow(Net::FTP).to receive(:open).and_return(ftp)
-        expect(ftp.session).to be_passive
+        expect(Net::FTP).to receive(:open).with(
+          'host', hash_including(passive: true)
+        )
+        ftp.send(:session)
       end
     end
   end

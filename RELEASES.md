@@ -15,18 +15,3 @@ Unofficial Ruby 3.3 / 3.4 compatibility preview. Updates Net::SSH to 7.3, Net::S
 Install from GitHub with Bundler; this fork is not published to RubyGems. See the [README](https://github.com/annrie/photocopier/blob/v1.5.0.pre.1/README.md) for installation and requirements.
 
 Tests mock external operations. Synchronization against real servers/databases has not been verified. Back up first and validate in a disposable staging environment.
-
-## Upstream history / 上流の履歴
-
-https://github.com/welaika/photocopier/releases
-
-### Earlier entries / 以前の履歴
-
-# 1.0.0.pre (2015-03-21)
-- semantic versioning
-- required ruby version ~> 2.0
-- allow scheme (protocol) for ftp in options
-- fixed ftp password escaping
-- replace `escape` gem with `Shellwords`
-- public interface with less methods
-

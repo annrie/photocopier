@@ -1,137 +1,78 @@
-# Photocopier
+# Photocopier — Ruby 3 / OpenSSL 3 compatibility fork
 
-Photocopier provides handy FTP/SSH adapters to abstract away file and directory copying.
-To move directories to/from the remote server, it wraps efficient tools like lftp and rsync.
+[![Tests](https://github.com/annrie/photocopier/actions/workflows/ruby.yml/badge.svg)](https://github.com/annrie/photocopier/actions/workflows/ruby.yml)
 
-![Ruby](https://github.com/welaika/photocopier/workflows/Ruby/badge.svg)
+## 日本語
 
-## Prerequisites
+これは[welaika/photocopier](https://github.com/welaika/photocopier)の非公式フォークです。
+Photocopierはファイル転送用のFTP/SSHアダプターで、[WordmoveのRuby 3対応フォーク](https://github.com/annrie/wordmove)から使用します。
+上流の作者・ライセンス表示を保持しています。
 
-If you need to use FTP protocol you need to install LFTP on your machine.
+Ruby **3.3 / 3.4**を対象に、Net::SSH 7.3、Net::SCP 4.1、Net::SFTP 4へ依存関係を更新しました。
+Net::FTP 0.3、Net::Protocol 0.4を指定し、Ruby 3.2以降で不要になった`io-wait`の読み込み警告を避けます。
+ActiveSupportが使用するBigDecimal / Base64 / Mutex_mも明示的に宣言しています。
 
-## Installation
+### 導入
 
-Add this line to your application's Gemfile:
-
-    gem 'photocopier'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install photocopier
-
-## Usage
+Wordmoveから利用する場合は[WordmoveのREADME](https://github.com/annrie/wordmove#readme)に従ってください。
+他のBundlerプロジェクトではGemfileへ追加します。
 
 ```ruby
-require 'photocopier'
-
-ssh = Photocopier::SSH.new(
-  host: 'my_host',
-  user: 'my_user'
-)
-
-# downloads a file and returns the content
-puts ssh.get('remote_file.txt')
-
-# downloads a file and saves the content
-ssh.get('remote_file.txt', './local_file.txt')
-
-# uploads a file with the specified content
-ssh.put('foobar!', 'remote_file.txt')
-
-# uploads a file
-ssh.put('./local_file.txt', 'remote_file.txt')
-
-# deletes a file
-ssh.delete('remote_file.txt')
-
-# mirros the remote directory content into the local machine (needs rsync on the local machine)
-ssh.get_directory('remote_dir', './local_dir')
-
-# and viceversa
-ssh.put_directory('./local_dir', 'remote_dir')
-
-# execs a command and waits for the result, returns stdout, stderr and exit code
-ssh.exec!('pwd') # => [ "/home/128423/users/.home\n", "", 0 ]
+gem 'photocopier', git: 'https://github.com/annrie/photocopier.git', tag: 'v1.5.0.pre.1'
 ```
-The very same commands are valid for the `Photocopier::FTP` adapter.
 
-## FTP
+その後`bundle install`を実行してください。このフォークはRubyGemsには公開していません。
+FTP利用にはlftp、SSHのディレクトリ同期にはrsyncとSSHが必要です。
 
-`Photocopier::FTP.new` accepts the following parameters
+### 検証と開発
+
+```sh
+bundle install
+bundle exec rake
+```
+
+`.ruby-version`は開発用に3.3.12を選びます。rbenvで別の対応版を使う際は`RBENV_VERSION`を指定してください。
+既存テストに加え、RSA公開鍵の読み込みと別プロセスからの起動を検証します。
+外部通信はモック化しており、実サーバーとのSSH/FTP転送は未検証のプレビュー版です。
+問題は[このフォークのIssues](https://github.com/annrie/photocopier/issues)へ報告してください。
+
+[変更履歴](CHANGELOG.md) / [上流のAPI説明（英語・旧版の導入手順を含む）](docs/upstream-readme.md)
+
+## English
+
+This is an unofficial fork of [welaika/photocopier](https://github.com/welaika/photocopier), the FTP/SSH transfer adapter used by the [Wordmove Ruby 3 compatibility fork](https://github.com/annrie/wordmove).
+Upstream authorship and licensing are preserved.
+
+Targets Ruby **3.3 / 3.4** with Net::SSH 7.3, Net::SCP 4.1, and Net::SFTP 4.
+Net::FTP 0.3 and Net::Protocol 0.4 avoid loading the deprecated `io-wait` shim on Ruby 3.2+.
+BigDecimal / Base64 / Mutex_m, used by ActiveSupport, is declared explicitly.
+
+### Installation
+
+For Wordmove, follow the [Wordmove README](https://github.com/annrie/wordmove#readme).
+In another Bundler project, add this to your Gemfile:
 
 ```ruby
-{
-  host: '', #mandatory
-  user: '', #mandatory
-  password: '', #mandatory
-  scheme: 'ftp' #default, other options are sftp and ftps
-}
-```
-For performance reasons, the `.get_directory` and `.put_directory` commands make
-use of `lftp`, so you need to have it installed on your machine.
-
-## SSH
-
-`Photocopier::SSH.new` accepts the following parameters (you DON'T need
-to pass them all).
-
-```ruby
-{
-  host: '',
-  user: '',
-  password: '',
-  port: '',
-  rsync_options: '',
-  gateway: {
-    host: '',
-    user: '',
-    password: '',
-    port: ''
-  }
-}
+gem 'photocopier', git: 'https://github.com/annrie/photocopier.git', tag: 'v1.5.0.pre.1'
 ```
 
-For performance reasons, the `.get_directory` and `.put_directory` commands make
-use of `rsync`, so you need to have it installed on your machine.
+Run `bundle install`. This fork has not been published to RubyGems.
+FTP requires lftp; SSH directory synchronization requires rsync and SSH.
 
-### Password gotchas
-**TL;DR:** Avoid specifying the `password` argument on Photocopier::SSH, and
-use more secure and reliable ways to authenticate (`ssh-copy-id` anyone?).
+### Testing and development
 
-There's no easy way to pass SSH passwords to `rsync`: the only way is to install
-a tool called [`sshpass`](http://sourceforge.net/projects/sshpass/) on your
-machine (and on the gateway machine, if you also need to specify the password
-of the final machine).
-
-On Linux, you can install it with your standard package manager. On Mac, you can
-have it via [`brew`](https://github.com/mxcl/homebrew):
-
-```
-brew install https://raw.github.com/eugeneoden/homebrew/eca9de1/Library/Formula/sshpass.rb
+```sh
+bundle install
+bundle exec rake
 ```
 
-**Please note that on Ubuntu 11.10 `sshpass` is at version 1.04, which has a
-[bug](https://bugs.launchpad.net/ubuntu/+source/sshpass/+bug/774882) that prevents
-it from working. Install version 1.03 or 1.05.**
+The development `.ruby-version` selects 3.3.12; set `RBENV_VERSION` to use another supported version with rbenv.
+Tests cover existing behavior, RSA public-key parsing, and loading in a separate process.
+External operations are mocked. This is a preview without verified SSH/FTP transfers against real servers.
+Report problems to [this fork's Issues](https://github.com/annrie/photocopier/issues).
 
-## Contributing
+[Changelog](CHANGELOG.md) / [Upstream API documentation (English; includes historical installation instructions)](docs/upstream-readme.md)
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Added some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+## License / ライセンス
 
-## Author
-
-made with ❤️ and ☕️ by [weLaika](http://dev.welaika.com)
-
-## License
-
-(The MIT License)
-
-Copyright © 2012-2019 [weLaika](https://dev.welaika.com)
+MIT — see [LICENSE](LICENSE). Original authors retain their copyright. / 原著作者の著作権表示を保持しています。
