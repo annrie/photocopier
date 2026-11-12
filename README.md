@@ -1,6 +1,7 @@
 # Photocopier — Ruby 3 / OpenSSL 3 compatibility fork
 
 [![Tests](https://github.com/annrie/photocopier/actions/workflows/ruby.yml/badge.svg)](https://github.com/annrie/photocopier/actions/workflows/ruby.yml)
+[![Ruby 3.3 | 3.4](https://img.shields.io/badge/Ruby-3.3%20%7C%203.4-CC342D?logo=ruby&logoColor=white)](photocopier.gemspec)
 
 ## 日本語
 
